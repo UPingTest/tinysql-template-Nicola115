@@ -16,7 +16,6 @@ package tablecodec
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"math"
 	"time"
 
@@ -74,18 +73,18 @@ func EncodeRowKeyWithHandle(tableID int64, handle int64) kv.Key {
 func DecodeRecordKey(key kv.Key) (tableID int64, handle int64, err error) {
 	/* Your code here */
 	if len(key) < RecordRowKeyLen{
-		return 0,0,fmt.Errorf("invalid key length")
+		return 0,0,errors.Errorf("invalid key length")
 	}
 
 	if string(key[:tablePrefixLength]) != string(tablePrefix){
-		return 0,0,fmt.Errorf("tablePrefix not matched")
+		return 0,0,errors.Errorf("tablePrefix not matched")
 	}
 	remain, tableID, err := codec.DecodeInt(key[tablePrefixLength:])
 	if err != nil{
 		return 0,0,errors.Trace(err)
 	}
 	if string(remain[:recordPrefixSepLength]) != string(recordPrefixSep){
-		return 0,0,fmt.Errorf("tablePrefix not matched")
+		return 0,0,errors.Errorf("tablePrefix not matched")
 	}
 	remain, handle, err = codec.DecodeInt(remain[recordPrefixSepLength:])
 	return
@@ -112,18 +111,18 @@ func EncodeIndexSeekKey(tableID int64, idxID int64, encodedValue []byte) kv.Key 
 func DecodeIndexKeyPrefix(key kv.Key) (tableID int64, indexID int64, indexValues []byte, err error) {
 	/* Your code here */
 	if len(key) < prefixLen+len(indexPrefixSep)+idLen{
-		return 0,0,nil, fmt.Errorf("invalid key length")
+		return 0,0,nil, errors.Errorf("invalid key length")
 	}
 
 	if string(key[:tablePrefixLength]) != string(tablePrefix){
-		return 0,0,nil,fmt.Errorf("tablePrefix not matched")
+		return 0,0,nil,errors.Errorf("tablePrefix not matched")
 	}
 	remain, tableID, err := codec.DecodeInt(key[tablePrefixLength:])
 	if err != nil{
 		return 0,0,nil,errors.Trace(err)
 	}
 	if string(remain[:len(indexPrefixSep)])!= string(indexPrefixSep){
-		return 0,0,nil,fmt.Errorf("indexPrefixSep not matched")
+		return 0,0,nil,errors.Errorf("indexPrefixSep not matched")
 	}
 	remain, indexID, err = codec.DecodeInt(remain[len(indexPrefixSep):])
 	if err != nil{
